@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const layout = require('./views/layout');
 const { db } = require('./models');
+const models = require('./models');
 
 const app = express();
 
@@ -35,6 +36,13 @@ then(() => {
 
 const PORT = 4000;
 
-app.listen(PORT, () => {
-  console.log(`App listening in port ${PORT}`);
-});
+const init = async () => {
+  await models.Page.sync()
+  await models.User.sync()
+
+  app.listen(PORT, () => {
+    console.log(`App listening in port ${PORT}`);
+  });
+}
+
+init(); 
