@@ -1,48 +1,19 @@
-const express = require('express');
-const morgan = require('morgan');
-const layout = require('./views/layout');
-const { db } = require('./models');
-const models = require('./models');
-
+const express = require("express");
 const app = express();
+const morgan = require("morgan");
+const bodyParser = require("body-parser");
+const path = require("path");
 
-app.use(morgan('dev'))
+app.use(morgan("dev")); //logging middleware
+app.use(express.static(path.join(__dirname, "./public"))); //serving up static files (e.g. css files)
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-app.use(express.static(__dirname + '/'));
+app.use("/wiki", require("./routes/wiki"));
+app.use("/users", require("./routes/users"));
 
-// parses url-encoded bodies
-app.use(express.urlencoded({ extended: false }));
+app.get('/', function (req, res) {
+   res.redirect('/wiki/');
+});
 
-// parses json bodies
-app.use(express.json())
-
-//CRUD create, read, update, delete
-// get, post, put, delete - routes
-
-//request, response
-app.get('/', (req, res, next) => {
-  try {
-      res.send(layout(''))
-  } catch (error){
-      console.log('error: ', error)
-      next(error)
-    }
-})
-
-db.authenticate().
-then(() => {
-  console.log('connected to the database');
-})
-
-const PORT = 4000;
-
-const init = async () => {
-  await models.Page.sync()
-  await models.User.sync()
-
-  app.listen(PORT, () => {
-    console.log(`App listening in port ${PORT}`);
-  });
-}
-
-init(); 
+module.exports = app;
